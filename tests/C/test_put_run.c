@@ -153,6 +153,7 @@ static int couple_write_nd(unsigned int ts, int num_vars, enum transport_type ty
 			data_tab[i], type);
 		if(type == USE_DSPACES){
 			common_put_sync(type);
+			uloga("%s(Yubo): after common_put_sync timestamp:%f\n", __func__, timer_timestamp());
 		}
 	}
 	tm_end = timer_read(&timer_);

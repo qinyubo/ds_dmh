@@ -48,6 +48,25 @@
 
 #define DSG_ID                  dsg->ds->self->ptlmap.id
 
+
+/* Function to get and return the current (wall clock) time. */
+double timer_timestamp_2(void)
+{
+        double ret;
+
+#ifdef XT3
+        ret = dclock();
+#else
+        struct timeval tv;
+
+        gettimeofday( &tv, 0 );
+        ret = (double) tv.tv_usec + tv.tv_sec * 1.e6;
+#endif
+        return ret;
+}
+
+
+
 struct cont_query {
         int                     cq_id;
         int                     cq_rank;
@@ -1351,6 +1370,7 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
             __func__, DSG_ID, odsc->name, odsc->version);
 #endif
         rpc_mem_info_cache(peer, msg, cmd); 
+        uloga("%s(Yubo): before rpc_receive_direct timestamp=%f\n", __func__, timer_timestamp_2());
         err = rpc_receive_direct(rpc_s, peer, msg);
         rpc_mem_info_reset(peer, msg, cmd);
 
@@ -1361,6 +1381,7 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
 	   locks in the client code. */
 
         err = obj_put_update_dht(dsg, od);
+        uloga("%s(Yubo): after obj_put_update_dht timestamp=%f\n", __func__, timer_timestamp_2());
         if (err == 0)
 	        return 0;
  err_free_msg:

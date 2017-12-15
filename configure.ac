@@ -1,77 +1,30 @@
-AC_INIT([dataspaces],[1.6.1])
+AC_INIT([dataspaces],[1.4.0])
 AC_CONFIG_AUX_DIR(config)
 
-dnl AM_INIT_AUTOMAKE([-Wall -Wno-extra-portability -Werror subdir-objects foreign])
-AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects foreign -Wno-extra-portability])
 
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_FC
 AC_PROG_RANLIB
 
-m4_ifdef([AM_PROG_AR],[AM_PROG_AR])
-
 dnl AC_PROG_LIBTOOL
+
 dnl AC_CRAY_PMI
 dnl AC_CRAY_UGNI
-AC_PORTALS
+dnl AC_PORTALS
 AC_INFINIBAND
 AC_DCMF
 AC_UGNI
 AC_GNI_PTAG
 AC_PAMI
-AC_TCP_SOCKET
-
 AC_CONFIGURE_OPTIONS
-
 
 dnl Generate flags for dataspaces lib creation which depends on the particular network transport layer. DSPACESLIB_* is used for compiling the lib, and linking testing codes.
 DSPACESLIB_CFLAGS=
 DSPACESLIB_CPPFLAGS=
 DSPACESLIB_LDFLAGS=
 DSPACESLIB_LDADD=
-
-
-dnl Check if DART_TCP is enabled
-AC_ARG_ENABLE(dart_tcp,
-[AS_HELP_STRING([--enable-dart-tcp],
-[Build DART over tcp socket.])])
-if test "x$enable_dart_tcp" == "xyes"; then
-  if test -z "${HAVE_UGNI_TRUE}"; then
-    AM_CONDITIONAL(HAVE_UGNI, false)
-    AC_DEFINE(HAVE_UGNI, 0, [])
-  elif test -z "${HAVE_DCMF_TRUE}"; then
-    AM_CONDITIONAL(HAVE_DCMF, false)
-    AC_DEFINE(HAVE_DCMF, 0, [])
-  elif test -z "${HAVE_PAMI_TRUE}"; then
-    AM_CONDITIONAL(HAVE_PAMI, false)
-    AC_DEFINE(HAVE_PAMI, 0, [])
-  elif test -z "${HAVE_INFINIBAND_TRUE}"; then
-    AM_CONDITIONAL(HAVE_INFINIBAND, false)
-    AC_DEFINE(HAVE_INFINIBAND, 0, [])
-  elif test -z "${HAVE_PORTALS_TRUE}"; then
-    AM_CONDITIONAL(HAVE_PORTALS, false)
-    AC_DEFINE(HAVE_PORTALS, 0, [])
-  fi
-else
-  if test -z "${HAVE_UGNI_TRUE}"; then
-    AM_CONDITIONAL(HAVE_TCP_SOCKET, false)
-    AC_DEFINE(HAVE_TCP_SOCKET, 0, [])
-  elif test -z "${HAVE_DCMF_TRUE}"; then
-    AM_CONDITIONAL(HAVE_TCP_SOCKET, false)
-    AC_DEFINE(HAVE_TCP_SOCKET, 0, [])
-  elif test -z "${HAVE_PAMI_TRUE}"; then
-    AM_CONDITIONAL(HAVE_TCP_SOCKET, false)
-    AC_DEFINE(HAVE_TCP_SOCKET, 0, [])
-  elif test -z "${HAVE_INFINIBAND_TRUE}"; then
-    AM_CONDITIONAL(HAVE_TCP_SOCKET, false)
-    AC_DEFINE(HAVE_TCP_SOCKET, 0, [])
-  elif test -z "${HAVE_PORTALS_TRUE}"; then
-    AM_CONDITIONAL(HAVE_TCP_SOCKET, false)
-    AC_DEFINE(HAVE_TCP_SOCKET, 0, [])
-  fi
-fi
-
 
 dnl Check if DIMES is enabled
 AC_ARG_ENABLE(dimes,
@@ -97,18 +50,18 @@ if test "x$enable_dimes" == "xyes"; then
         fi
 fi
 
-dnl added for Aries EOS
-dnl Check if it is Aries network
-AC_ARG_ENABLE(aries,
-    [AS_HELP_STRING([--enable-aries],
-        [Build Dart on Aries network. ])])
-if test "x$enable_aries" == "xyes"; then
-	AC_DEFINE(DS_HAVE_ARIES, 1, [uGNI-Aires is enabled])
-	echo "uGNI Aries version enabled!"
-fi
-dnl AM_CONDITIONAL(DS_HAVE_ARIES, true) 
+dnl Check if DataSpaces location-aware write is enabled
+AC_ARG_ENABLE(dataspaces_location_aware_write,
+    [AS_HELP_STRING([--enable-dataspaces-location-aware-write],
+        [Include experimental feature. DataSpaces client writes data to
+         servers that running on local compute node. This feature is useful
+         when co-locating the execution of DataSpaces servers with application
+         on the same set of compute nodes. By default this is not included.])])
+AM_CONDITIONAL([DATASPACES_LOCATION_AWARE_WRITE], [test "x$enable_dataspaces_location_aware_write" == "xyes"])
 
-dnl Check the max array dimension
+if test "x$enable_dataspaces_location_aware_write" == "xyes"; then
+    AC_DEFINE(DS_HAVE_DSPACES_LOCATION_AWARE_WRITE, 1, [DATASPACES location-aware write is enabled])
+fi
 
 if test -z "${HAVE_UGNI_TRUE}"; then
   DSPACESLIB_CPPFLAGS+=" ${PMI_CPPFLAGS}"
@@ -121,12 +74,12 @@ if test -z "${HAVE_UGNI_TRUE}"; then
   DSPACESLIB_LDADD+=" ${UGNI_LIBS}"
 fi
 
-if test -z "${HAVE_PORTALS_TRUE}"; then
-  DSPACESLIB_CPPFLAGS+=" ${PORTALS_CPPFLAGS}"
-  DSPACESLIB_CFLAGS+=" ${PORTALS_CFLAGS}"
-  DSPACESLIB_LDFLAGS+=" ${PORTALS_LDFLAGS}"
-  DSPACESLIB_LDADD+=" ${PORTALS_LIBS}"
-fi
+#if test -z "${HAVE_PORTALS_TRUE}"; then
+#  DSPACESLIB_CPPFLAGS+=" ${PORTALS_CPPFLAGS}"
+#  DSPACESLIB_CFLAGS+=" ${PORTALS_CFLAGS}"
+#  DSPACESLIB_LDFLAGS+=" ${PORTALS_LDFLAGS}"
+#  DSPACESLIB_LDADD+=" ${PORTALS_LIBS}"
+#fi
 
 if test -z "${HAVE_INFINIBAND_TRUE}"; then
   DSPACESLIB_CPPFLAGS+=" ${INFINIBAND_CPPFLAGS}"
@@ -156,13 +109,13 @@ AC_SUBST(DSPACESLIB_LDADD)
 
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_FILES([
-		Makefile
-		dart/Makefile
-		src/Makefile
-		tests/Makefile
-		tests/C/Makefile
-		tests/Fortran/Makefile
-		])
+    Makefile
+    dart/Makefile
+    src/Makefile
+    tests/Makefile
+    tests/C/Makefile
+    tests/Fortran/Makefile
+    ])
 
 AC_OUTPUT
 
@@ -170,42 +123,42 @@ AC_OUTPUT
 echo "Network transport layer"
 if test -z "${HAVE_UGNI_TRUE}"; then
   echo "Cray UGNI enabled.";
-  echo "	- CRAY_PMI_CPPFLAGS = $PMI_CPPFLAGS";
-  echo "	- CRAY_PMI_LDFLAGS = $PMI_LDFLAGS";
-  echo "	- CRAY_PMI_LIBS = $PMI_LIBS";
-  echo "	- CRAY_UGNI_CPPFLAGS = $UGNI_CPPFLAGS";
-  echo "	- CRAY_UGNI_LDFLAGS = $UGNI_LDFLAGS";
-  echo "	- CRAY_UGNI_LIBS = $UGNI_LIBS";
+  echo "  - CRAY_PMI_CPPFLAGS = $PMI_CPPFLAGS";
+  echo "  - CRAY_PMI_LDFLAGS = $PMI_LDFLAGS";
+  echo "  - CRAY_PMI_LIBS = $PMI_LIBS";
+  echo "  - CRAY_UGNI_CPPFLAGS = $UGNI_CPPFLAGS";
+  echo "  - CRAY_UGNI_LDFLAGS = $UGNI_LDFLAGS";
+  echo "  - CRAY_UGNI_LIBS = $UGNI_LIBS";
 else
   echo "No Cray UGNI."
 fi
 
-if test -z "${HAVE_PORTALS_TRUE}"; then
-  echo "Cray Portals enabled.";
-  echo "	- PORTALS_CFLAGS = $PORTALS_CFLAGS";
-  echo "	- PORTALS_CPPFLAGS = $PORTALS_CPPFLAGS";
-  echo "	- PORTALS_LDFLAGS = $PORTALS_LDFLAGS";
-  echo "	- PORTALS_LIBS = $PORTALS_LIBS";
-else
-  echo "No Cray Portals."
-fi
+#if test -z "${HAVE_PORTALS_TRUE}"; then
+#  echo "Cray Portals enabled.";
+#  echo " - PORTALS_CFLAGS = $PORTALS_CFLAGS";
+#  echo " - PORTALS_CPPFLAGS = $PORTALS_CPPFLAGS";
+#  echo " - PORTALS_LDFLAGS = $PORTALS_LDFLAGS";
+#  echo " - PORTALS_LIBS = $PORTALS_LIBS";
+#else
+#  echo "No Cray Portals."
+#fi
 
 if test -z "${HAVE_INFINIBAND_TRUE}"; then
   echo "Infiniband available.";
-  echo "	- INFINIBAND_CFLAGS = $INFINIBAND_CFLAGS";
-  echo "	- INFINIBAND_CPPFLAGS = $INFINIBAND_CPPFLAGS";
-  echo "	- INFINIBAND_LDFLAGS = $INFINIBAND_LDFLAGS";
-  echo "	- INFINIBAND_LIBS = $INFINIBAND_LIBS";
+  echo "  - INFINIBAND_CFLAGS = $INFINIBAND_CFLAGS";
+  echo "  - INFINIBAND_CPPFLAGS = $INFINIBAND_CPPFLAGS";
+  echo "  - INFINIBAND_LDFLAGS = $INFINIBAND_LDFLAGS";
+  echo "  - INFINIBAND_LIBS = $INFINIBAND_LIBS";
 else
   echo "No Infiniband."
 fi
 
 if test -z "${HAVE_DCMF_TRUE}"; then
   echo "IBM DCMF enabled.";
-  echo "	- DCMF_CFLAGS = $DCMF_CFLAGS";
-  echo "	- DCMF_CPPFLAGS = $DCMF_CPPFLAGS";
-  echo "	- DCMF_LDFLAGS = $DCMF_LDFLAGS";
-  echo "	- DCMF_LIBS = $DCMF_LIBS";
+  echo "  - DCMF_CFLAGS = $DCMF_CFLAGS";
+  echo "  - DCMF_CPPFLAGS = $DCMF_CPPFLAGS";
+  echo "  - DCMF_LDFLAGS = $DCMF_LDFLAGS";
+  echo "  - DCMF_LIBS = $DCMF_LIBS";
 else
   echo "No IBM DCMF."
 fi
@@ -218,10 +171,4 @@ if test -z "${HAVE_PAMI_TRUE}"; then
   echo "        - PAMI_LIBS = $PAMI_LIBS";
 else
   echo "No IBM PAMI."
-fi
-
-if test -z "${HAVE_TCP_SOCKET_TRUE}"; then
-  echo "TCP socket DART is enabled.";
-else
-  echo "No TCP socket DART."
 fi

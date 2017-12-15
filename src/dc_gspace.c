@@ -125,6 +125,26 @@ struct dcg_lock {
 	char			name[LOCK_NAME_SIZE];
 };
 
+/*timer*/
+/* Function to get and return the current (wall clock) time. */
+double timer_timestamp_1(void)
+{
+        double ret;
+
+#ifdef XT3
+        ret = dclock();
+#else
+        struct timeval tv;
+
+        gettimeofday( &tv, 0 );
+        ret = (double) tv.tv_usec + tv.tv_sec * 1.e6;
+#endif
+        return ret;
+}
+
+
+
+
 /* 
    Some operations  may require synchronizing API;  use this structure
    as a temporary hack to implement synchronization. 
@@ -1659,6 +1679,9 @@ int dcg_obj_put(struct obj_data *od)
         hdr = msg->msg_rpc->pad;
         hdr->odsc = od->obj_desc;
         memcpy(&hdr->gdim, &od->gdim, sizeof(struct global_dimension));
+
+        uloga("%s(Yubo): before rpc_send timestamp: %f\n", __func__, timer_timestamp_1());
+
 
         err = rpc_send(dcg->dc->rpc_s, peer, msg);
         if (err < 0) {
