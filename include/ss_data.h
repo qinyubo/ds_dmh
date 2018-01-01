@@ -297,4 +297,5 @@ void obj_data_free_in_mem(struct obj_data *od);
 void obj_data_free_in_ssd(struct obj_data *od);
 void obj_data_copy_to_ssd(struct obj_data *od);
 void obj_data_copy_to_mem(struct obj_data *od);
+void obj_data_copy_to_ssd_pthrd(struct obj_data *od); //Yubo
 #endif /* __SS_DATA_H_ */

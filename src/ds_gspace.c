@@ -1278,10 +1278,11 @@ static int obj_put_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
 		//ls->mem_size = 274877906944;	//256G
 		//ls->mem_size = 12884901888;	//12G
 		//ls->mem_size = 8589934592;	//8G
-		ls->mem_size = 6442450944;	//6G
+		//ls->mem_size = 6442450944;	//6G
 		//ls->mem_size = 4294967296;	//4G
 		//ls->mem_size = 2147483648;	//2G
-#ifdef DEBUG
+        ls->mem_size = 0;
+//#ifdef DEBUG
 		{
 			char *str;
 			asprintf(&str, "S%2d: ls->mem_size=%llu, dsg->ls->mem_size=%llu, ds_conf.memory_size=%d",
@@ -1289,10 +1290,10 @@ static int obj_put_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
 			uloga("'%s()': %s\n", __func__, str);
 			free(str);
 		}
-#endif
+//#endif
 	}
 	
-#ifdef DEBUG
+//#ifdef DEBUG
 	{
 		char *str;
 		asprintf(&str, "S%2d: dsg->ls->mem_used=%llu, obj_data_size(&od->obj_desc)=%d",
@@ -1300,16 +1301,19 @@ static int obj_put_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
 		uloga("'%s()': %s\n", __func__, str);
 		free(str);
 	}
-#endif
+//#endif
 	od->sl = in_memory; //data storage level in memory Duan
 	od->so = caching; //data storage operation caching Duan
 	ls_add_obj(dsg->ls, od);
 
 	//cache data to memory and arrange memory if it is full Duan
+    uloga("%s(Yubo), in cache_replacement\n",__func__);
 	cache_replacement(obj_data_size(&od->obj_desc));
 	pthread_mutex_lock(&pmutex); //lock
 	dsg->ls->mem_used += obj_data_size(&od->obj_desc);
 	pthread_mutex_unlock(&pmutex);
+
+    uloga("%s(Yubo): after obj_put_completion timestamp=%f\n", __func__, timer_timestamp_2());
 
     free(msg);
 
@@ -2017,6 +2021,7 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
 	//if (from_obj->sl == in_ssd || (from_obj->data == NULL && from_obj->_data == NULL)){
 		//pthread_mutex_lock(&pmutex); //lock
 		cache_replacement(obj_data_size(&from_obj->obj_desc));
+        uloga("%s(Yubo), in dsgrpc_obj_get #1\n", __func__);
 			
 		obj_data_copy_to_mem(from_obj);
 

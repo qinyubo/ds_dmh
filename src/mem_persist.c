@@ -176,6 +176,11 @@ void pmem_init(const char *file_name)
 	//#endif
 	
 	void * start_ptr = 0, *mem_ptr;
+
+/*  //Quick fix on Stampede2
+	if(mkdir("/tmp/yubo_ssd", 0777) && errno != EEXIST)
+        perror("mkdir /tmp/yubo_ssd");
+*/
 	
 	fd = open(pmem_file, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 	if (fd == -1)
@@ -232,8 +237,8 @@ void pmem_destroy()
 		munmap(pmem_header->pmem_ptr, PMEM_SIZE);
 	}
 	close(fd);
-	remove(pmem_file);
-	free(pmem_file);
+	//remove(pmem_file);
+	//free(pmem_file);
 
 //#ifdef DEBUG
 	{

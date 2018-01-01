@@ -1,7 +1,7 @@
 AC_INIT([dataspaces],[1.4.0])
 AC_CONFIG_AUX_DIR(config)
 
-AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects foreign -Wno-extra-portability])
+AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects foreign])
 
 AC_PROG_CC
 AC_PROG_CXX

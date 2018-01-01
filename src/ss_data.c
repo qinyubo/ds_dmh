@@ -34,6 +34,7 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+#include <pthread.h> //Yubo
 
 #include "debug.h"
 #include "ss_data.h"
@@ -43,6 +44,10 @@
 #ifdef TIMING_SSD
 #include "timer.h"
 #endif
+
+
+extern pthread_mutex_t pmutex;//init prefetching pthread function lock
+extern pthread_cond_t  pcond;//init prefetching pthread function cond
 
 // TODO: I should  import the header file with  the definition for the
 // iovec_t data type.
@@ -1441,21 +1446,29 @@ void obj_data_free_in_ssd(struct obj_data *od)
 void obj_data_copy_to_ssd(struct obj_data *od)
 {
 	od->s_data = pmem_alloc(obj_data_size(&od->obj_desc));
-#ifdef DEBUG
+//#ifdef DEBUG
 	char *str;
 	asprintf(&str, "obj_data_copy_to_ssd: od->s_data = pmem_alloc(obj_data_size(&od->obj_desc)) %p", od->s_data);
 	uloga("'%s()': %s\n", __func__, str);
 	free(str);
-#endif
+//#endif
 	if (od->s_data != NULL){
 		if (od->_data) {
-			memcpy(od->s_data, od->_data, obj_data_size(&od->obj_desc) + 7); //void *memcpy(void *dest, const void *src, size_t n);
-			msync(od->s_data, obj_data_size(&od->obj_desc) + 7, MS_SYNC);//int msync ( void * ptr, size_t len, int flags) flags = MS_ASYNC|MS_SYNC
+            uloga("%s(Yubo), coyp to ssd #1\n", __func__);
+			//memcpy(od->s_data, od->_data, obj_data_size(&od->obj_desc) + 7); //void *memcpy(void *dest, const void *src, size_t n);
+			//msync(od->s_data, obj_data_size(&od->obj_desc) + 7, MS_SYNC);//int msync ( void * ptr, size_t len, int flags) flags = MS_ASYNC|MS_SYNC
+
+            memcpy(od->s_data, od->_data, obj_data_size(&od->obj_desc)/2 + 7); //void *memcpy(void *dest, const void *src, size_t n);
+            msync(od->s_data, obj_data_size(&od->obj_desc)/2 + 7, MS_SYNC);//int msync ( void * ptr, size_t len, int flags) flags = MS_ASYNC|MS_SYNC
+            
+            //memcpy(od->s_data+obj_data_size(&od->obj_desc)/2, od->_data+obj_data_size(&od->obj_desc)/2, obj_data_size(&od->obj_desc)/2 + 7); //void *memcpy(void *dest, const void *src, size_t n);
+            //msync(od->s_data+obj_data_size(&od->obj_desc)/2, obj_data_size(&od->obj_desc)/2 + 7, MS_SYNC);//int msync ( void * ptr, size_t len, int flags) flags = MS_ASYNC|MS_SYNC
 
 			uloga("'%s()': explicit data copy to ssd on descriptor %s.\n",
 			__func__, od->obj_desc.name);
 		}
 		else{
+             uloga("%s(Yubo), coyp to ssd #2\n", __func__);
 			memcpy(od->s_data, od->data, obj_data_size(&od->obj_desc)); //void *memcpy(void *dest, const void *src, size_t n);
 			msync(od->s_data, obj_data_size(&od->obj_desc), MS_SYNC);//int msync ( void * ptr, size_t len, int flags) flags = MS_ASYNC|MS_SYNC
 		}
@@ -1467,12 +1480,139 @@ void obj_data_copy_to_ssd(struct obj_data *od)
 	od->sl = in_memory_ssd;
 }
 
+struct arg_struct{
+    struct obj_data *od;
+    int thrd_id[4];
+    int tot_thrd;
+};
+
+void *pthread_memcpy(void *arguments){
+
+    struct arg_struct *args = arguments;
+    int thrd_id;
+    //pthread_t self;
+    int local_total_threads;
+    int i=0;
+
+    uloga("%s(Yubo): memcpy #1\n", __func__);
+
+    //thrd_id = pthread_self();
+    //pthread_getunique_np(&self, &thrd_id); //Get my thread id
+    uloga("%s(Yubo): memcpy #2\n", __func__);
+
+    local_total_threads = args->tot_thrd;
+
+    //temp method to find out my thread id
+    for(i=0; i<4; i++){// find out a thread id
+        thrd_id = args->thrd_id[i];
+
+        if(thrd_id != -1){
+            args->thrd_id[i] = -1;
+            break;
+        }
+    }
+
+
+
+
+
+    uloga("%s(Yubo): memcpy #3\n", __func__);
+
+    uloga("%s(Yubo): my thrd_id=%d\n", __func__, thrd_id);
+    //uloga("%s(Yubo): my pthread_self()=%d\n", __func__, pthread_self());
+
+    //do memcpy
+    
+    if(thrd_id == 0){
+        uloga("%s(Yubo): memcpy #4\n", __func__);
+        memcpy(args->od->s_data, args->od->_data, obj_data_size(&args->od->obj_desc) + 7);
+    }
+    else{
+        uloga("%s(Yubo): memcpy #5\n", __func__);
+    memcpy(args->od->s_data+obj_data_size(&args->od->obj_desc)/local_total_threads*(thrd_id), \
+        args->od->_data+obj_data_size(&args->od->obj_desc)/local_total_threads*(thrd_id), \
+        obj_data_size(&args->od->obj_desc)/local_total_threads + 7);
+    }
+    uloga("%s(Yubo): memcpy #4\n", __func__);
+    
+
+}
+
+void obj_data_copy_to_ssd_pthrd(struct obj_data *od)
+{
+
+    //for pthread
+    pthread_t thrds[4];
+    int i, total_num_threads=4;
+    struct arg_struct args;
+
+
+    od->s_data = pmem_alloc(obj_data_size(&od->obj_desc));
+//#ifdef DEBUG
+    char *str;
+    asprintf(&str, "obj_data_copy_to_ssd: od->s_data = pmem_alloc(obj_data_size(&od->obj_desc)) %p", od->s_data);
+    uloga("'%s()': %s\n", __func__, str);
+    free(str);
+//#endif
+    if (od->s_data != NULL){
+        if (od->_data) {
+            uloga("%s(Yubo), coyp to ssd #1\n", __func__);
+            args.od=od;
+            args.tot_thrd = total_num_threads;
+
+            //Need to find a better way to pass thread id
+            //init
+            for(i=0;i<4;i++){
+                args.thrd_id[i]=-1;  
+            }
+            //assign value
+            for(i=0; i<total_num_threads; i++){
+                args.thrd_id[i] = i;
+            }
+
+
+            
+            for(i=0; i<total_num_threads; i++){
+                uloga("%s(Yubo): pthread #1\n", __func__);
+            pthread_create(&thrds[i], NULL, pthread_memcpy, (void*)&args);
+            uloga("%s(Yubo): pthread #2\n", __func__);
+            }
+
+            for(i=0; i<total_num_threads; i++){
+                uloga("%s(Yubo): pthread #3\n", __func__);
+                
+                pthread_join(thrds[i], NULL);
+                pthread_cancel(thrds[i]);
+                uloga("%s(Yubo): pthread #4\n", __func__);
+            }
+            
+            msync(od->s_data, obj_data_size(&od->obj_desc)/2 + 7, MS_SYNC);//int msync ( void * ptr, size_t len, int flags) flags = MS_ASYNC|MS_SYNC
+            
+           
+            uloga("'%s()': explicit data copy to ssd on descriptor %s.\n",
+            __func__, od->obj_desc.name);
+        }
+        else{
+             uloga("%s(Yubo), coyp to ssd #2\n", __func__);
+            memcpy(od->s_data, od->data, obj_data_size(&od->obj_desc)); //void *memcpy(void *dest, const void *src, size_t n);
+            msync(od->s_data, obj_data_size(&od->obj_desc), MS_SYNC);//int msync ( void * ptr, size_t len, int flags) flags = MS_ASYNC|MS_SYNC
+        }
+    }
+    else{ 
+        uloga("%s(): ERROR od->s_data %p, no pmem space is allocated! \n", __func__, od->s_data);
+
+    }
+    od->sl = in_memory_ssd;
+}
+
 /*copy object data from ssd to mem */
 void obj_data_copy_to_mem(struct obj_data *od)
 {
 	if (od->s_data) {
+        uloga("%s(Yubo), coyp to mem #1\n", __func__);
 		od->_data = od->data = malloc(obj_data_size(&od->obj_desc) + 7);
 		if (!od->_data) {
+            uloga("%s(Yubo), coyp to mem #2\n", __func__);
 			free(od);
 			uloga("%s(): ERROR malloc od->_data %p is is NULL! \n", __func__, od->_data);
 		}
@@ -1482,8 +1622,10 @@ void obj_data_copy_to_mem(struct obj_data *od)
 			__func__, od->obj_desc.name);
 	}
 	else{
+        uloga("%s(Yubo), coyp to mem #3\n", __func__);
 		uloga("%s(): ERROR od->s_data %p is is NULL! \n", __func__, od->s_data);
 	}
+    uloga("%s(Yubo), coyp to mem #4\n", __func__);
 	od->sl = in_memory_ssd;
 }
 

@@ -197,6 +197,7 @@ int common_get(const char *var_name,
 	void *data, enum transport_type type)
 {
 	if ( type == USE_DSPACES ) {
+        //dspaces_hint(var_name, ver, size,ndim,lb, ub); //Yubo
 		return dspaces_get(var_name, ver, size,
                         ndim,lb, ub,data);
 	} else if (type == USE_DIMES) {
@@ -227,6 +228,7 @@ int common_put_sync(enum transport_type type) {
 
 int common_run_server(int num_sp, int num_cp, enum transport_type type, void* gcomm) {
         int err;
+        int i;
         if (type == USE_DSPACES) {
                 struct ds_gspace *dsg;
                 dsg = dsg_alloc(num_sp, num_cp, "dataspaces.conf");
@@ -243,8 +245,10 @@ int common_run_server(int num_sp, int num_cp, enum transport_type type, void* gc
 		}
 #endif
 		pmem_init(dsg_id_str);//ssd storage initiate						
-		pthread_t t_pref;//prefetch thread
-		pthread_create(&t_pref, NULL, prefetch_thread, (void*)NULL); //Create thread
+		pthread_t t_pref[1];//prefetch thread
+        for(i=0; i<1; i++){
+		pthread_create(&t_pref[i], NULL, prefetch_thread, (void*)i); //Create thread
+        }
 
                 while (!dsg_complete(dsg)){
                         err = dsg_process(dsg);
@@ -260,8 +264,10 @@ int common_run_server(int num_sp, int num_cp, enum transport_type type, void* gc
 		free(str);
 		}
 #endif
-		pthread_cancel(t_pref);//kill t_pref thread
-		pthread_join(t_pref, NULL);//wait t_pref thread end
+        for(i=0; i<1; i++){	
+		pthread_join(t_pref[i], NULL);//wait t_pref thread end
+        pthread_cancel(t_pref[i]);//kill t_pref thread
+        }
 		pthread_mutex_destroy(&pmutex);//destroy mutex lock
 		pthread_cond_destroy(&pcond);//destroy condition
 		pmem_destroy();//ssd storage destroy

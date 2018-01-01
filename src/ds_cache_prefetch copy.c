@@ -51,40 +51,52 @@ Pthread function for prefetching data from SSD to DRAM  when call get function.
 void *prefetch_thread(void*attr){
 	int j = 0;
 	int local_cond_index = 0;
-	long thrd_id;
-
-	thrd_id = (long)attr;
-
+#ifdef DEBUG
+	char *str;
+	asprintf(&str, "init prefetch_thread: cond_num %d cond_index %d  ",
+		cond_num, cond_index);
+	uloga("'%s()': %s\n", __func__, str);
+	free(str);
+#endif
 	while (j == 0)
 	{
 		pthread_mutex_lock(&pmutex);		
 		if (cond_num == 0){/*sleep */
-		
-
+#ifdef DEBUG
+			char *str;
+			asprintf(&str, "wait prefetch_thread: cond_num %d cond_index %d  ",
+				cond_num, cond_index);
+			uloga("'%s()': %s\n", __func__, str);
+			free(str);
+#endif
 			pthread_cond_wait(&pcond, &pmutex); //wait
-		
-
+#ifdef DEBUG
+			asprintf(&str, "wake prefetch_thread: cond_num %d cond_index %d  ",
+				cond_num, cond_index);
+			uloga("'%s()': %s\n", __func__, str);
+			free(str);
+#endif
 		}else{ /*cond_num > 0 */
 			local_cond_index = cond_index;
 			do{
-				uloga("%s(Yubo), prefetch_thread #1, my thrd_id=%ld, cond_index=%d\n", __func__, thrd_id, cond_index);
-
 				obj_data_copy_to_mem(pod_list.pref_od[local_cond_index]);//copy data from ssd to mem
-				
 				pod_list.pref_od[local_cond_index]->sl = in_memory_ssd;
 				pod_list.pref_od[local_cond_index]->so = prefetching;
 				ls->mem_used += obj_data_size(&pod_list.pref_od[local_cond_index]->obj_desc);
-				
+#ifdef DEBUG
+				char *str;
+				asprintf(&str, "runable prefetch_thread: cond_num %d local_cond_index %d  ",
+					cond_num, local_cond_index);
+				uloga("'%s()': %s\n", __func__, str);
+				free(str);
+#endif
 				local_cond_index = get_prev(local_cond_index, MAX_PREFETCH);
-				
 			} while (pod_list.pref_od[local_cond_index] !=NULL && pod_list.pref_od[local_cond_index]->sl == prefetching && pod_list.pref_od[local_cond_index]->sl == in_ssd);
-			
+
 			cond_num = 0;
 		}
-		
 		//sleep(1);
 		pthread_mutex_unlock(&pmutex);
-		
 	}
 	return NULL;
 }
@@ -97,10 +109,17 @@ int cache_replacement(int added_mem_size){
 	struct obj_data *od, *t;
 	struct list_head *list;
 	
-	uloga("%s(Yubo), cache replacement #1\n", __func__);
+//#ifdef DEBUG
+	{
+	char *str;
+	asprintf(&str, "ls->mem_size %llu ls->mem_used %llu  added_mem_size %d",
+		ls->mem_size, ls->mem_used, added_mem_size);
+	uloga("'%s()': %s\n", __func__, str);
+	free(str);
+	}
+//#endif
+
 	if (ls->mem_size >= ls->mem_used + added_mem_size){
-		uloga("%s(Yubo), cache replacement #5\n", __func__);
-		uloga("%s(Yubo), ls->mem_size=%llu, ls->mem_used + added_mem_size=%llu\n", __func__,ls->mem_size, ls->mem_used + added_mem_size);
 		return 0;
 	}
 	while (ls->mem_size < ls->mem_used + added_mem_size && index < ls->size_hash){
@@ -108,12 +127,30 @@ int cache_replacement(int added_mem_size){
 		list = &ls->obj_hash[index];
 		list_for_each_entry_safe(od, t, list, struct obj_data, obj_entry) {
 
-			uloga("%s(Yubo), cache replacement #2\n", __func__);
+#ifdef DEBUG
+			{
+				char *str;
+				asprintf(&str, "list_for_each_entry_safe: od->sl == %d od->so == %d od->data == %p od->_data == %p od->s_data == %p",
+					od->sl, od->so, od->data, od->_data, od->s_data);
+				str = str_append(str, bbox_sprint(&od->obj_desc.bb));
+				uloga("'%s()': %s\n", __func__, str);
+				free(str);
+			}
+#endif
 
 			if (od->s_data != NULL && (od->data != NULL || od->_data != NULL) && od->so == caching){
 			//if (od->sl == in_memory_ssd && (od->data != NULL || od->data != NULL) && od->so != prefetching){
 
-				uloga("%s(Yubo), cache replacement #3\n", __func__);
+#ifdef DEBUG
+				{
+					char *str;
+					asprintf(&str, "od->s_data != NULL && (od->data != NULL || od->data != NULL) && od->so != prefetching: od->sl == %d od->so == %d od->data == %p od->_data == %p od->s_data == %p",
+						od->sl, od->so, od->data, od->_data, od->s_data);
+					str = str_append(str, bbox_sprint(&od->obj_desc.bb));
+					uloga("'%s()': %s\n", __func__, str);
+					free(str);
+				}
+#endif
 
 				/*unload data in memory Duan*/
 				obj_data_free_in_mem(od);
@@ -125,11 +162,20 @@ int cache_replacement(int added_mem_size){
 			}
 			if (od->s_data == NULL && (od->data != NULL || od->_data != NULL) && od->so == caching){
 		//if (od->sl == in_memory && (od->data != NULL || od->data != NULL) && od->so != prefetching){
-				uloga("%s(Yubo), cache replacement #4\n", __func__);
+
+#ifdef DEBUG	
+			{
+				char *str;
+				asprintf(&str, "(od->s_data == NULL && (od->data != NULL || od->data != NULL) && od->so != prefetching: od->sl == %d od->so == %d od->data == %p od->_data == %p od->s_data == %p",
+					od->sl, od->so, od->data, od->_data, od->s_data);
+				str = str_append(str, bbox_sprint(&od->obj_desc.bb));
+				uloga("'%s()': %s\n", __func__, str);
+				free(str);
+			}
+#endif
 
 				/*copy data to ssd and unload data in memory Duan*/
-				obj_data_copy_to_ssd_pthrd(od); //Yubo
-				//obj_data_copy_to_ssd(od);
+				obj_data_copy_to_ssd(od);
 				obj_data_free_in_mem(od);
 
 				od->so = normal;
