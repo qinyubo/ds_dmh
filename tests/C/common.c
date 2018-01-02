@@ -249,6 +249,7 @@ int common_run_server(int num_sp, int num_cp, enum transport_type type, void* gc
         for(i=0; i<1; i++){
 		pthread_create(&t_pref[i], NULL, prefetch_thread, (void*)i); //Create thread
         }
+        
 
                 while (!dsg_complete(dsg)){
                         err = dsg_process(dsg);
@@ -256,6 +257,7 @@ int common_run_server(int num_sp, int num_cp, enum transport_type type, void* gc
                                 break;
                 }
 
+       
 #ifdef DEBUG
 		{
 		char *str;
@@ -265,17 +267,18 @@ int common_run_server(int num_sp, int num_cp, enum transport_type type, void* gc
 		}
 #endif
         for(i=0; i<1; i++){	
-		pthread_join(t_pref[i], NULL);//wait t_pref thread end
         pthread_cancel(t_pref[i]);//kill t_pref thread
+		pthread_join(t_pref[i], NULL);//wait t_pref thread end
+        
         }
 		pthread_mutex_destroy(&pmutex);//destroy mutex lock
 		pthread_cond_destroy(&pcond);//destroy condition
-		pmem_destroy();//ssd storage destroy
+		pmem_destroy();//ssd storage destroy    
 
                 //dsg_barrier(dsg);
 		MPI_Barrier(*(MPI_Comm*)gcomm);
                 dsg_free(dsg);
-
+        uloga("%s(Yubo) after dsg_free\n",__func__);
                 if (err == 0)
                         uloga("All ok.\n");
                 return 0;
