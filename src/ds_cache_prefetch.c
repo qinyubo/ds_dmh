@@ -59,15 +59,16 @@ void *prefetch_thread(void*attr){
 	{
 		pthread_mutex_lock(&pmutex);		
 		if (cond_num == 0){/*sleep */
-		
+		//uloga("%s(Yubo): prefetch_thread #1\n", __func__);
 
 			pthread_cond_wait(&pcond, &pmutex); //wait
+			//uloga("%s(Yubo): prefetch_thread #2\n", __func__);
 		
 
 		}else{ /*cond_num > 0 */
 			local_cond_index = cond_index;
 			do{
-				uloga("%s(Yubo), prefetch_thread #1, my thrd_id=%ld, cond_index=%d\n", __func__, thrd_id, cond_index);
+				//uloga("%s(Yubo), prefetch_thread #1, my thrd_id=%ld, cond_index=%d\n", __func__, thrd_id, cond_index);
 
 				obj_data_copy_to_mem(pod_list.pref_od[local_cond_index]);//copy data from ssd to mem
 				
@@ -81,11 +82,13 @@ void *prefetch_thread(void*attr){
 			
 			cond_num = 0;
 		}
+		//uloga("%s(Yubo): prefetch_thread #3\n", __func__);
 		
 		//sleep(1);
 		pthread_mutex_unlock(&pmutex);
 		
 	}
+	//uloga("%s(Yubo): prefetch_thread #4\n", __func__);
 	return NULL;
 }
 
@@ -97,10 +100,10 @@ int cache_replacement(int added_mem_size){
 	struct obj_data *od, *t;
 	struct list_head *list;
 	
-	uloga("%s(Yubo), cache replacement #1\n", __func__);
+	//uloga("%s(Yubo), cache replacement #1\n", __func__);
 	if (ls->mem_size >= ls->mem_used + added_mem_size){
-		uloga("%s(Yubo), cache replacement #5\n", __func__);
-		uloga("%s(Yubo), ls->mem_size=%llu, ls->mem_used + added_mem_size=%llu\n", __func__,ls->mem_size, ls->mem_used + added_mem_size);
+		//uloga("%s(Yubo), cache replacement #5\n", __func__);
+		//uloga("%s(Yubo), ls->mem_size=%llu, ls->mem_used + added_mem_size=%llu\n", __func__,ls->mem_size, ls->mem_used + added_mem_size);
 		return 0;
 	}
 	while (ls->mem_size < ls->mem_used + added_mem_size && index < ls->size_hash){
@@ -108,12 +111,12 @@ int cache_replacement(int added_mem_size){
 		list = &ls->obj_hash[index];
 		list_for_each_entry_safe(od, t, list, struct obj_data, obj_entry) {
 
-			uloga("%s(Yubo), cache replacement #2\n", __func__);
+			//uloga("%s(Yubo), cache replacement #2\n", __func__);
 
 			if (od->s_data != NULL && (od->data != NULL || od->_data != NULL) && od->so == caching){
 			//if (od->sl == in_memory_ssd && (od->data != NULL || od->data != NULL) && od->so != prefetching){
 
-				uloga("%s(Yubo), cache replacement #3\n", __func__);
+				//uloga("%s(Yubo), cache replacement #3\n", __func__);
 
 				/*unload data in memory Duan*/
 				obj_data_free_in_mem(od);
@@ -125,7 +128,7 @@ int cache_replacement(int added_mem_size){
 			}
 			if (od->s_data == NULL && (od->data != NULL || od->_data != NULL) && od->so == caching){
 		//if (od->sl == in_memory && (od->data != NULL || od->data != NULL) && od->so != prefetching){
-				uloga("%s(Yubo), cache replacement #4\n", __func__);
+				//uloga("%s(Yubo), cache replacement #4\n", __func__);
 
 				/*copy data to ssd and unload data in memory Duan*/
 				obj_data_copy_to_ssd_pthrd(od); //Yubo

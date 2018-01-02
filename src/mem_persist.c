@@ -237,8 +237,8 @@ void pmem_destroy()
 		munmap(pmem_header->pmem_ptr, PMEM_SIZE);
 	}
 	close(fd);
-	//remove(pmem_file);
-	//free(pmem_file);
+	remove(pmem_file);
+	free(pmem_file);
 
 //#ifdef DEBUG
 	{

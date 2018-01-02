@@ -1974,6 +1974,8 @@ static int obj_get_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
         free(msg);
         obj_data_free(od);
 
+        uloga("%s(Yubo), get completed!\n",__func__);
+
         return 0;
 }
 
@@ -2030,6 +2032,7 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
 		dsg->ls->mem_used += obj_data_size(&from_obj->obj_desc);
 		pthread_mutex_unlock(&pmutex);
         }
+        uloga("%s(Yubo), in dsgrpc_obj_get #2\n", __func__);
 
         //TODO:  if required  object is  not  found, I  should send  a
         //proper error message back, and the remote node should handle
@@ -2049,11 +2052,14 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
         // representation is the same on both ends.
         // od = obj_data_alloc(&oh->odsc);
         od = (fast_v)? obj_data_allocv(&oh->u.o.odsc) : obj_data_alloc(&oh->u.o.odsc);
+        uloga("%s(Yubo), in dsgrpc_obj_get #3\n", __func__);
         if (!od)
                 goto err_out;
 
         (fast_v)? ssd_copyv(od, from_obj) : ssd_copy(od, from_obj);
         od->obj_ref = from_obj;
+
+        uloga("%s(Yubo), in dsgrpc_obj_get #4\n", __func__);
 
         msg = msg_buf_alloc(rpc_s, peer, 0);
         if (!msg) {
@@ -2065,16 +2071,18 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
         msg->size = (fast_v)? obj_data_sizev(&od->obj_desc) / sizeof(iovec_t) : obj_data_size(&od->obj_desc);
         msg->cb = obj_get_completion;
         msg->private = od;
-
+        uloga("%s(Yubo), in dsgrpc_obj_get #5\n", __func__);
 
         rpc_mem_info_cache(peer, msg, cmd); 
         err = (fast_v)? rpc_send_directv(rpc_s, peer, msg) : rpc_send_direct(rpc_s, peer, msg);
         rpc_mem_info_reset(peer, msg, cmd);
+        uloga("%s(Yubo), in dsgrpc_obj_get #6, err=%d\n", __func__, err);
         if (err == 0)
                 return 0;
 
         obj_data_free(od);
         free(msg);
+        uloga("%s(Yubo), in dsgrpc_obj_get #7\n", __func__);
  err_out:
         uloga("'%s()': failed with %d.\n", __func__, err);
         return err;
