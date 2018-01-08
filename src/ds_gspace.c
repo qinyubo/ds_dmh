@@ -1282,7 +1282,7 @@ static int obj_put_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
 		//ls->mem_size = 4294967296;	//4G
 		//ls->mem_size = 2147483648;	//2G
         ls->mem_size = 0;
-//#ifdef DEBUG
+#ifdef DEBUG
 		{
 			char *str;
 			asprintf(&str, "S%2d: ls->mem_size=%llu, dsg->ls->mem_size=%llu, ds_conf.memory_size=%d",
@@ -1290,10 +1290,10 @@ static int obj_put_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
 			uloga("'%s()': %s\n", __func__, str);
 			free(str);
 		}
-//#endif
+#endif
 	}
 	
-//#ifdef DEBUG
+#ifdef DEBUG
 	{
 		char *str;
 		asprintf(&str, "S%2d: dsg->ls->mem_used=%llu, obj_data_size(&od->obj_desc)=%d",
@@ -1301,14 +1301,16 @@ static int obj_put_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
 		uloga("'%s()': %s\n", __func__, str);
 		free(str);
 	}
-//#endif
+#endif
 	od->sl = in_memory; //data storage level in memory Duan
 	od->so = caching; //data storage operation caching Duan
 	ls_add_obj(dsg->ls, od);
 
 	//cache data to memory and arrange memory if it is full Duan
-    uloga("%s(Yubo), in cache_replacement\n",__func__);
+    //uloga("%s(Yubo), in cache_replacement\n",__func__);
 	cache_replacement(obj_data_size(&od->obj_desc));
+    // uloga("%s(Yubo): after cache_replacement timestamp=%f\n", __func__, timer_timestamp_2());
+
 	pthread_mutex_lock(&pmutex); //lock
 	dsg->ls->mem_used += obj_data_size(&od->obj_desc);
 	pthread_mutex_unlock(&pmutex);
@@ -1374,7 +1376,7 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
             __func__, DSG_ID, odsc->name, odsc->version);
 #endif
         rpc_mem_info_cache(peer, msg, cmd); 
-        uloga("%s(Yubo): before rpc_receive_direct timestamp=%f\n", __func__, timer_timestamp_2());
+        //uloga("%s(Yubo): before rpc_receive_direct timestamp=%f\n", __func__, timer_timestamp_2());
         err = rpc_receive_direct(rpc_s, peer, msg);
         rpc_mem_info_reset(peer, msg, cmd);
 
@@ -2023,7 +2025,7 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
 	//if (from_obj->sl == in_ssd || (from_obj->data == NULL && from_obj->_data == NULL)){
 		//pthread_mutex_lock(&pmutex); //lock
 		cache_replacement(obj_data_size(&from_obj->obj_desc));
-        uloga("%s(Yubo), in dsgrpc_obj_get #1\n", __func__);
+       // uloga("%s(Yubo), in dsgrpc_obj_get #1\n", __func__);
 			
 		obj_data_copy_to_mem(from_obj);
 
@@ -2032,7 +2034,7 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
 		dsg->ls->mem_used += obj_data_size(&from_obj->obj_desc);
 		pthread_mutex_unlock(&pmutex);
         }
-        uloga("%s(Yubo), in dsgrpc_obj_get #2\n", __func__);
+       // uloga("%s(Yubo), in dsgrpc_obj_get #2\n", __func__);
 
         //TODO:  if required  object is  not  found, I  should send  a
         //proper error message back, and the remote node should handle
@@ -2052,14 +2054,14 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
         // representation is the same on both ends.
         // od = obj_data_alloc(&oh->odsc);
         od = (fast_v)? obj_data_allocv(&oh->u.o.odsc) : obj_data_alloc(&oh->u.o.odsc);
-        uloga("%s(Yubo), in dsgrpc_obj_get #3\n", __func__);
+      //  uloga("%s(Yubo), in dsgrpc_obj_get #3\n", __func__);
         if (!od)
                 goto err_out;
 
         (fast_v)? ssd_copyv(od, from_obj) : ssd_copy(od, from_obj);
         od->obj_ref = from_obj;
 
-        uloga("%s(Yubo), in dsgrpc_obj_get #4\n", __func__);
+      //  uloga("%s(Yubo), in dsgrpc_obj_get #4\n", __func__);
 
         msg = msg_buf_alloc(rpc_s, peer, 0);
         if (!msg) {
@@ -2071,18 +2073,18 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
         msg->size = (fast_v)? obj_data_sizev(&od->obj_desc) / sizeof(iovec_t) : obj_data_size(&od->obj_desc);
         msg->cb = obj_get_completion;
         msg->private = od;
-        uloga("%s(Yubo), in dsgrpc_obj_get #5\n", __func__);
+      //  uloga("%s(Yubo), in dsgrpc_obj_get #5\n", __func__);
 
         rpc_mem_info_cache(peer, msg, cmd); 
         err = (fast_v)? rpc_send_directv(rpc_s, peer, msg) : rpc_send_direct(rpc_s, peer, msg);
         rpc_mem_info_reset(peer, msg, cmd);
-        uloga("%s(Yubo), in dsgrpc_obj_get #6, err=%d\n", __func__, err);
+      //  uloga("%s(Yubo), in dsgrpc_obj_get #6, err=%d\n", __func__, err);
         if (err == 0)
                 return 0;
 
         obj_data_free(od);
         free(msg);
-        uloga("%s(Yubo), in dsgrpc_obj_get #7\n", __func__);
+       // uloga("%s(Yubo), in dsgrpc_obj_get #7\n", __func__);
  err_out:
         uloga("'%s()': failed with %d.\n", __func__, err);
         return err;

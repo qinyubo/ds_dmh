@@ -41,10 +41,10 @@ host_triplet = x86_64-unknown-linux-gnu
 #					gni/dc_base_gni.h \
 #					gni/dart_rdma_gni.h
 
-am__append_2 = ib/dart_rpc_ib.h \
-					ib/ds_base_ib.h \
-					ib/dc_base_ib.h \
-					ib/dart_rdma_ib.h
+#am__append_2 = ib/dart_rpc_ib.h \
+#					ib/ds_base_ib.h \
+#					ib/dc_base_ib.h \
+#					ib/dart_rdma_ib.h
 
 #am__append_3 = dcmf/dart_rpc_dcmf.h \
 #					dcmf/ds_base_dcmf.h \
@@ -56,6 +56,10 @@ am__append_2 = ib/dart_rpc_ib.h \
 #                                        pami/dc_base_pami.h \
 #                                        pami/dart_rdma_pami.h
 
+am__append_5 = tcp/dart_rpc_tcp.h \
+					tcp/ds_base_tcp.h \
+					tcp/dc_base_tcp.h
+
 subdir = dart
 DIST_COMMON = $(am__noinst_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -65,6 +69,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_configure_options.m4 \
 	$(top_srcdir)/config/ac_gni_ptag.m4 \
 	$(top_srcdir)/config/ac_infiniband.m4 \
 	$(top_srcdir)/config/ac_pami.m4 \
+	$(top_srcdir)/config/ac_portals.m4 \
+	$(top_srcdir)/config/ac_tcp_socket.m4 \
 	$(top_srcdir)/config/ac_ugni.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -104,21 +110,25 @@ am__libdart_a_SOURCES_DIST = dcmf/dart_rpc_dcmf.c dcmf/ds_base_dcmf.c \
 	dcmf/dc_base_dcmf.c dcmf/dart_rdma_dcmf.c ib/dart_rpc_ib.c \
 	ib/ds_base_ib.c ib/dc_base_ib.c ib/dart_rdma_ib.c \
 	pami/dart_rpc_pami.c pami/ds_base_pami.c pami/dc_base_pami.c \
-	pami/dart_rdma_pami.c gni/dart_rpc_gni.c gni/ds_base_gni.c \
+	pami/dart_rdma_pami.c tcp/dart_rpc_tcp.c tcp/ds_base_tcp.c \
+	tcp/dc_base_tcp.c gni/dart_rpc_gni.c gni/ds_base_gni.c \
 	gni/dc_base_gni.c gni/dart_rdma_gni.c
 am__dirstamp = $(am__leading_dot)dirstamp
 ##am_libdart_a_OBJECTS = gni/dart_rpc_gni.$(OBJEXT) \
 ##	gni/ds_base_gni.$(OBJEXT) \
 ##	gni/dc_base_gni.$(OBJEXT) \
 ##	gni/dart_rdma_gni.$(OBJEXT)
-##am_libdart_a_OBJECTS = pami/dart_rpc_pami.$(OBJEXT) \
-##	pami/ds_base_pami.$(OBJEXT) \
-##	pami/dc_base_pami.$(OBJEXT) \
-##	pami/dart_rdma_pami.$(OBJEXT)
-am_libdart_a_OBJECTS = ib/dart_rpc_ib.$(OBJEXT) \
-	ib/ds_base_ib.$(OBJEXT) \
-	ib/dc_base_ib.$(OBJEXT) \
-	ib/dart_rdma_ib.$(OBJEXT)
+am_libdart_a_OBJECTS = tcp/dart_rpc_tcp.$(OBJEXT) \
+	tcp/ds_base_tcp.$(OBJEXT) \
+	tcp/dc_base_tcp.$(OBJEXT)
+#am_libdart_a_OBJECTS = pami/dart_rpc_pami.$(OBJEXT) \
+#	pami/ds_base_pami.$(OBJEXT) \
+#	pami/dc_base_pami.$(OBJEXT) \
+#	pami/dart_rdma_pami.$(OBJEXT)
+#am_libdart_a_OBJECTS = ib/dart_rpc_ib.$(OBJEXT) \
+#	ib/ds_base_ib.$(OBJEXT) \
+#	ib/dc_base_ib.$(OBJEXT) \
+#	ib/dart_rdma_ib.$(OBJEXT)
 #am_libdart_a_OBJECTS = dcmf/dart_rpc_dcmf.$(OBJEXT) \
 #	dcmf/ds_base_dcmf.$(OBJEXT) \
 #	dcmf/dc_base_dcmf.$(OBJEXT) \
@@ -140,20 +150,22 @@ am__noinst_HEADERS_DIST = dart.h debug.h list.h \
 	ib/ds_base_ib.h ib/dc_base_ib.h ib/dart_rdma_ib.h \
 	dcmf/dart_rpc_dcmf.h dcmf/ds_base_dcmf.h dcmf/dc_base_dcmf.h \
 	dcmf/dart_rdma_dcmf.h pami/dart_rpc_pami.h pami/ds_base_pami.h \
-	pami/dc_base_pami.h pami/dart_rdma_pami.h
+	pami/dc_base_pami.h pami/dart_rdma_pami.h tcp/dart_rpc_tcp.h \
+	tcp/ds_base_tcp.h tcp/dc_base_tcp.h
 HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run aclocal-1.11
-AMTAR = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run tar
-AUTOCONF = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run autoconf
-AUTOHEADER = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run autoheader
-AUTOMAKE = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run automake-1.11
+ACLOCAL = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run aclocal-1.11
+AMTAR = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run tar
+AUTOCONF = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run autoconf
+AUTOHEADER = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run autoheader
+AUTOMAKE = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run automake-1.11
 AWK = gawk
 CC = mpicc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -DHAVE_INFINIBAND -lrdmacm
+CFLAGS = -g -O2
+CONFIG_ARG =  'CC=mpicc' 'FC=mpif90' '--enable-dart-tcp' 'LIBS=-lpthread -lm'
 CPP = mpicc -E
 CPPFLAGS = 
 CXX = g++
@@ -166,10 +178,14 @@ DCMF_LDFLAGS =
 DCMF_LIBS = 
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
-DSPACESLIB_CFLAGS = $  
-DSPACESLIB_CPPFLAGS =   
-DSPACESLIB_LDADD =    -lrdmacm
+DSPACESLIB_CFLAGS =  
+DSPACESLIB_CPPFLAGS =  
+DSPACESLIB_LDADD =  -lm  
 DSPACESLIB_LDFLAGS =  
+DSPACES_EXT_CFLAGS =  
+DSPACES_EXT_CPPFLAGS = 
+DSPACES_EXT_LDADD =  -lm  
+DSPACES_EXT_LDFLAGS = 
 ECHO_C = 
 ECHO_N = -n
 ECHO_T = 
@@ -177,29 +193,30 @@ EGREP = /bin/grep -E
 EXEEXT = 
 FC = mpif90
 FCFLAGS = -g -O2
+FCLIBS =  -L/usr/mpi/gcc/openmpi-1.10.5a1/lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../.. -lpthread -lgfortranbegin -lgfortran -lm -lmpi_usempi -lmpi_mpifh -lmpi
 GREP = /bin/grep
 INFINIBAND_CFLAGS =  
 INFINIBAND_CPPFLAGS =  
 INFINIBAND_LDFLAGS = 
-INFINIBAND_LIBS =  
+INFINIBAND_LIBS =  -libverbs 
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LDFLAGS = 
+LDFLAGS =  
 LIBOBJS = 
-LIBS = 
+LIBS = -lpthread -lm
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run makeinfo
+MAKEINFO = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = dataspaces
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = dataspaces
-PACKAGE_STRING = dataspaces 1.4.0
+PACKAGE_STRING = dataspaces 1.6.5
 PACKAGE_TARNAME = dataspaces
-PACKAGE_VERSION = 1.4.0
+PACKAGE_VERSION = 1.6.5
 PAMI_CFLAGS = 
 PAMI_CPPFLAGS = 
 PAMI_LDFLAGS = 
@@ -208,6 +225,13 @@ PATH_SEPARATOR = :
 PMI_CPPFLAGS = 
 PMI_LDLAGS = 
 PMI_LIBS = -lpmi
+PORTALS_CFLAGS = 
+PORTALS_CPPFLAGS = 
+PORTALS_HEADER = 
+PORTALS_LDFLAGS = 
+PORTALS_LIBS = 
+PORTALS_NAL_HEADER = 
+PORTALS_RT_HEADER = 
 PTHREAD_CC = mpicc
 PTHREAD_CFLAGS = 
 PTHREAD_LIBS = 
@@ -215,14 +239,18 @@ RANLIB = ranlib
 SET_MAKE = 
 SHELL = /bin/sh
 STRIP = 
+TCP_SOCKET_CFLAGS = 
+TCP_SOCKET_CPPFLAGS = 
+TCP_SOCKET_LDFLAGS = 
+TCP_SOCKET_LIBS = 
 UGNI_CPPFLAGS = 
 UGNI_LDLAGS = 
 UGNI_LIBS = -lugni
-VERSION = 1.4.0
-abs_builddir = /home1/yq47/code/dataspace/dataspaces_dmh/dart
-abs_srcdir = /home1/yq47/code/dataspace/dataspaces_dmh/dart
-abs_top_builddir = /home1/yq47/code/dataspace/dataspaces_dmh
-abs_top_srcdir = /home1/yq47/code/dataspace/dataspaces_dmh
+VERSION = 1.6.5
+abs_builddir = /cac/u01/yq47/Documents/dataspaces_dmh_caper/dart
+abs_srcdir = /cac/u01/yq47/Documents/dataspaces_dmh_caper/dart
+abs_top_builddir = /cac/u01/yq47/Documents/dataspaces_dmh_caper
+abs_top_srcdir = /cac/u01/yq47/Documents/dataspaces_dmh_caper
 ac_ct_CC = mpicc
 ac_ct_CXX = g++
 ac_ct_FC = 
@@ -251,7 +279,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/install-sh
+install_sh = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -278,7 +306,7 @@ lib_LIBRARIES = libdart.a
 
 #include_HEADERS = dart.h
 noinst_HEADERS = dart.h debug.h list.h $(am__append_1) $(am__append_2) \
-	$(am__append_3) $(am__append_4)
+	$(am__append_3) $(am__append_4) $(am__append_5)
 #libdart_a_SOURCES = dcmf/dart_rpc_dcmf.c \
 #					dcmf/ds_base_dcmf.c \
 #					dcmf/dc_base_dcmf.c \
@@ -292,15 +320,19 @@ noinst_HEADERS = dart.h debug.h list.h $(am__append_1) $(am__append_2) \
 #					portals/ds_base_portals.h \
 #					portals/dc_base_portals.h
 #endif # HAVE_PORTALS
-libdart_a_SOURCES = ib/dart_rpc_ib.c \
-					ib/ds_base_ib.c \
-					ib/dc_base_ib.c \
-					ib/dart_rdma_ib.c
+#libdart_a_SOURCES = ib/dart_rpc_ib.c \
+#					ib/ds_base_ib.c \
+#					ib/dc_base_ib.c \
+#					ib/dart_rdma_ib.c
 
 #libdart_a_SOURCES = pami/dart_rpc_pami.c \
 #                                        pami/ds_base_pami.c \
 #                                        pami/dc_base_pami.c \
 #                                        pami/dart_rdma_pami.c
+
+libdart_a_SOURCES = tcp/dart_rpc_tcp.c \
+					tcp/ds_base_tcp.c \
+					tcp/dc_base_tcp.c 
 
 #libdart_a_SOURCES = gni/dart_rpc_gni.c \
 #					gni/ds_base_gni.c \
@@ -415,6 +447,18 @@ pami/dc_base_pami.$(OBJEXT): pami/$(am__dirstamp) \
 	pami/$(DEPDIR)/$(am__dirstamp)
 pami/dart_rdma_pami.$(OBJEXT): pami/$(am__dirstamp) \
 	pami/$(DEPDIR)/$(am__dirstamp)
+tcp/$(am__dirstamp):
+	@$(MKDIR_P) tcp
+	@: > tcp/$(am__dirstamp)
+tcp/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) tcp/$(DEPDIR)
+	@: > tcp/$(DEPDIR)/$(am__dirstamp)
+tcp/dart_rpc_tcp.$(OBJEXT): tcp/$(am__dirstamp) \
+	tcp/$(DEPDIR)/$(am__dirstamp)
+tcp/ds_base_tcp.$(OBJEXT): tcp/$(am__dirstamp) \
+	tcp/$(DEPDIR)/$(am__dirstamp)
+tcp/dc_base_tcp.$(OBJEXT): tcp/$(am__dirstamp) \
+	tcp/$(DEPDIR)/$(am__dirstamp)
 gni/$(am__dirstamp):
 	@$(MKDIR_P) gni
 	@: > gni/$(am__dirstamp)
@@ -452,6 +496,9 @@ mostlyclean-compile:
 	-rm -f pami/dart_rpc_pami.$(OBJEXT)
 	-rm -f pami/dc_base_pami.$(OBJEXT)
 	-rm -f pami/ds_base_pami.$(OBJEXT)
+	-rm -f tcp/dart_rpc_tcp.$(OBJEXT)
+	-rm -f tcp/dc_base_tcp.$(OBJEXT)
+	-rm -f tcp/ds_base_tcp.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -472,6 +519,9 @@ include pami/$(DEPDIR)/dart_rdma_pami.Po
 include pami/$(DEPDIR)/dart_rpc_pami.Po
 include pami/$(DEPDIR)/dc_base_pami.Po
 include pami/$(DEPDIR)/ds_base_pami.Po
+include tcp/$(DEPDIR)/dart_rpc_tcp.Po
+include tcp/$(DEPDIR)/dc_base_tcp.Po
+include tcp/$(DEPDIR)/ds_base_tcp.Po
 
 .c.o:
 	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -607,6 +657,8 @@ distclean-generic:
 	-rm -f ib/$(am__dirstamp)
 	-rm -f pami/$(DEPDIR)/$(am__dirstamp)
 	-rm -f pami/$(am__dirstamp)
+	-rm -f tcp/$(DEPDIR)/$(am__dirstamp)
+	-rm -f tcp/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -616,7 +668,7 @@ clean: clean-am
 clean-am: clean-generic clean-libLIBRARIES mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf dcmf/$(DEPDIR) gni/$(DEPDIR) ib/$(DEPDIR) pami/$(DEPDIR)
+	-rm -rf dcmf/$(DEPDIR) gni/$(DEPDIR) ib/$(DEPDIR) pami/$(DEPDIR) tcp/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -662,7 +714,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf dcmf/$(DEPDIR) gni/$(DEPDIR) ib/$(DEPDIR) pami/$(DEPDIR)
+	-rm -rf dcmf/$(DEPDIR) gni/$(DEPDIR) ib/$(DEPDIR) pami/$(DEPDIR) tcp/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

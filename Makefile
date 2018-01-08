@@ -36,7 +36,9 @@ host_triplet = x86_64-unknown-linux-gnu
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
+	$(top_srcdir)/configure \
+	$(top_srcdir)/scripts/dspaces_config.makesrc.in AUTHORS \
+	COPYING ChangeLog INSTALL NEWS config/compile \
 	config/config.guess config/config.sub config/depcomp \
 	config/install-sh config/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -45,6 +47,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_configure_options.m4 \
 	$(top_srcdir)/config/ac_gni_ptag.m4 \
 	$(top_srcdir)/config/ac_infiniband.m4 \
 	$(top_srcdir)/config/ac_pami.m4 \
+	$(top_srcdir)/config/ac_portals.m4 \
+	$(top_srcdir)/config/ac_tcp_socket.m4 \
 	$(top_srcdir)/config/ac_ugni.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -53,7 +57,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = scripts/dspaces_config.makesrc
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -108,15 +112,16 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run aclocal-1.11
-AMTAR = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run tar
-AUTOCONF = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run autoconf
-AUTOHEADER = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run autoheader
-AUTOMAKE = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run automake-1.11
+ACLOCAL = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run aclocal-1.11
+AMTAR = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run tar
+AUTOCONF = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run autoconf
+AUTOHEADER = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run autoheader
+AUTOMAKE = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run automake-1.11
 AWK = gawk
 CC = mpicc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -DHAVE_INFINIBAND -lrdmacm
+CFLAGS = -g -O2
+CONFIG_ARG =  'CC=mpicc' 'FC=mpif90' '--enable-dart-tcp' 'LIBS=-lpthread -lm'
 CPP = mpicc -E
 CPPFLAGS = 
 CXX = g++
@@ -129,10 +134,14 @@ DCMF_LDFLAGS =
 DCMF_LIBS = 
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
-DSPACESLIB_CFLAGS = $  
-DSPACESLIB_CPPFLAGS =   
-DSPACESLIB_LDADD =    -lrdmacm
+DSPACESLIB_CFLAGS =  
+DSPACESLIB_CPPFLAGS =  
+DSPACESLIB_LDADD =  -lm  
 DSPACESLIB_LDFLAGS =  
+DSPACES_EXT_CFLAGS =  
+DSPACES_EXT_CPPFLAGS = 
+DSPACES_EXT_LDADD =  -lm  
+DSPACES_EXT_LDFLAGS = 
 ECHO_C = 
 ECHO_N = -n
 ECHO_T = 
@@ -140,29 +149,30 @@ EGREP = /bin/grep -E
 EXEEXT = 
 FC = mpif90
 FCFLAGS = -g -O2
+FCLIBS =  -L/usr/mpi/gcc/openmpi-1.10.5a1/lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7/../../.. -lpthread -lgfortranbegin -lgfortran -lm -lmpi_usempi -lmpi_mpifh -lmpi
 GREP = /bin/grep
 INFINIBAND_CFLAGS =  
 INFINIBAND_CPPFLAGS =  
 INFINIBAND_LDFLAGS = 
-INFINIBAND_LIBS =  
+INFINIBAND_LIBS =  -libverbs 
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LDFLAGS = 
+LDFLAGS =  
 LIBOBJS = 
-LIBS = 
+LIBS = -lpthread -lm
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/missing --run makeinfo
+MAKEINFO = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = dataspaces
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = dataspaces
-PACKAGE_STRING = dataspaces 1.4.0
+PACKAGE_STRING = dataspaces 1.6.5
 PACKAGE_TARNAME = dataspaces
-PACKAGE_VERSION = 1.4.0
+PACKAGE_VERSION = 1.6.5
 PAMI_CFLAGS = 
 PAMI_CPPFLAGS = 
 PAMI_LDFLAGS = 
@@ -171,6 +181,13 @@ PATH_SEPARATOR = :
 PMI_CPPFLAGS = 
 PMI_LDLAGS = 
 PMI_LIBS = -lpmi
+PORTALS_CFLAGS = 
+PORTALS_CPPFLAGS = 
+PORTALS_HEADER = 
+PORTALS_LDFLAGS = 
+PORTALS_LIBS = 
+PORTALS_NAL_HEADER = 
+PORTALS_RT_HEADER = 
 PTHREAD_CC = mpicc
 PTHREAD_CFLAGS = 
 PTHREAD_LIBS = 
@@ -178,14 +195,18 @@ RANLIB = ranlib
 SET_MAKE = 
 SHELL = /bin/sh
 STRIP = 
+TCP_SOCKET_CFLAGS = 
+TCP_SOCKET_CPPFLAGS = 
+TCP_SOCKET_LDFLAGS = 
+TCP_SOCKET_LIBS = 
 UGNI_CPPFLAGS = 
 UGNI_LDLAGS = 
 UGNI_LIBS = -lugni
-VERSION = 1.4.0
-abs_builddir = /home1/yq47/code/dataspace/dataspaces_dmh
-abs_srcdir = /home1/yq47/code/dataspace/dataspaces_dmh
-abs_top_builddir = /home1/yq47/code/dataspace/dataspaces_dmh
-abs_top_srcdir = /home1/yq47/code/dataspace/dataspaces_dmh
+VERSION = 1.6.5
+abs_builddir = /cac/u01/yq47/Documents/dataspaces_dmh_caper
+abs_srcdir = /cac/u01/yq47/Documents/dataspaces_dmh_caper
+abs_top_builddir = /cac/u01/yq47/Documents/dataspaces_dmh_caper
+abs_top_srcdir = /cac/u01/yq47/Documents/dataspaces_dmh_caper
 ac_ct_CC = mpicc
 ac_ct_CXX = g++
 ac_ct_FC = 
@@ -214,7 +235,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home1/yq47/code/dataspace/dataspaces_dmh/config/install-sh
+install_sh = ${SHELL} /cac/u01/yq47/Documents/dataspaces_dmh_caper/config/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -291,6 +312,8 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+scripts/dspaces_config.makesrc: $(top_builddir)/config.status $(top_srcdir)/scripts/dspaces_config.makesrc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.

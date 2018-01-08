@@ -862,6 +862,7 @@ static int peer_process_send_list(struct rpc_server *rpc_s, struct node_id *peer
 /* ------------------------------------------------------------------
   Network/Device/IB system operation
 */
+/*
 char *ip_search(void) //bug fixed
 {
 	int sfd;
@@ -880,6 +881,42 @@ char *ip_search(void) //bug fixed
 
 
 	return inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
+}
+*/
+
+char *ip_search(void)
+{
+	struct sockaddr_in address;
+	memset(&address, 0, sizeof(address));
+
+	struct ifaddrs *addrs;
+	getifaddrs(&addrs);
+	struct ifaddrs *head = addrs;
+
+	int count =0;
+
+	for (; head != NULL; head = head->ifa_next) {
+        	if (head->ifa_name == NULL || strcmp(IB_INTERFACE, head->ifa_name) == 0){
+               		break;
+		}
+		count++;
+	}
+
+	int sfd, intr;
+	struct ifreq buf[16];
+	struct ifconf ifc;
+	sfd = socket(AF_INET, SOCK_DGRAM, 0);
+	if(sfd < 0)
+		return ERRORIP;
+	ifc.ifc_len = sizeof(buf);
+	ifc.ifc_buf = (caddr_t) buf;
+	if(ioctl(sfd, SIOCGIFCONF, (char *) &ifc))
+		return ERRORIP;
+	intr = ifc.ifc_len / sizeof(struct ifreq);
+	while(intr-- > 0 && ioctl(sfd, SIOCGIFADDR, (char *) &buf[intr]));
+	close(sfd);
+
+	return inet_ntoa(((struct sockaddr_in *) (&buf[count-1].ifr_addr))->sin_addr);
 }
 
 // Check if the format of IP address is correct. (done)
@@ -1496,6 +1533,8 @@ int rpc_connect(struct rpc_server *rpc_s, struct node_id *peer)
 	int err, check;
 	check = 0;
 
+	uloga("%(Yubo): I am at IB\n",__func__);
+
 	// Resolve the IP+Port of DS_Master
 	ip = inet_ntoa(peer->ptlmap.address.sin_addr);
 	snprintf(port, sizeof(port), "%u", ntohs(peer->ptlmap.address.sin_port));
@@ -1757,6 +1796,7 @@ struct msg_buf *msg_buf_alloc(struct rpc_server *rpc_s, const struct node_id *pe
 
 void rpc_add_service(enum cmd_type rpc_cmd, rpc_service rpc_func)	//Done
 {
+	uloga("%(Yubo): I am at IB\n",__func__);
 	rpc_commands[num_service].rpc_cmd = rpc_cmd;
 	rpc_commands[num_service].rpc_func = rpc_func;
 	num_service++;

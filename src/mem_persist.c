@@ -52,7 +52,8 @@
 //#define PMEM_SIZE 8*1024*1024*1024L
 //#define PMEM_SIZE 1*1024*1024*1024L
 /* using /ssd1/sd904/ ssd file path for this example */
-#define PMEM_PATH "/project1/irodero-001/ssd_tmp/"
+#define PMEM_PATH "/ssd/yubo/"
+//#define PMEM_PATH "/cac/u01/yq47/Documents/tmp"
 //#define PMEM_PATH "/home1/sd904/"
 //#define PMEM_PATH ""
 

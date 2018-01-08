@@ -14,14 +14,28 @@
 /* DIMES is enabled */
 /* #undef DS_HAVE_DIMES */
 
-/* DATASPACES location-aware write is enabled */
-/* #undef DS_HAVE_DSPACES_LOCATION_AWARE_WRITE */
+/* Define to dummy `main' function (if any) required to link to the Fortran
+   libraries. */
+/* #undef FC_DUMMY_MAIN */
+
+/* Define if F77 and FC dummy `main' functions are identical. */
+/* #undef FC_DUMMY_MAIN_EQ_F77 */
+
+/* Define to a macro mangling the given C identifier (in lower and upper
+   case), which must not contain underscores, for linking with Fortran. */
+#define FC_FUNC(name,NAME) name ## _
+
+/* As FC_FUNC, but for C identifiers containing underscores. */
+#define FC_FUNC_(name,NAME) name ## _
 
 /* Fixed Gemini cookie */
 /* #undef GNI_COOKIE */
 
 /* Fixed Gemini ptag */
 /* #undef GNI_PTAG */
+
+/* Define if you have Cray Portals. */
+/* #undef HAVE_CRAY_PORTALS */
 
 /* Define if you have the DCMF. */
 /* #undef HAVE_DCMF */
@@ -36,13 +50,22 @@
 #define HAVE_IBVERBS_H 1
 
 /* Define if you have the Infiniband. */
-#define HAVE_INFINIBAND 1
+#define HAVE_INFINIBAND 0
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
+/* Define to 1 if you have the `m' library (-lm). */
+#define HAVE_LIBM 1
+
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
+
+/* Define to 1 if you have the <p3nal_utcp.h> header file. */
+/* #undef HAVE_P3NAL_UTCP_H */
+
+/* Define to 1 if you have the <p3rt/p3rt.h> header file. */
+/* #undef HAVE_P3RT_P3RT_H */
 
 /* Define if you have the PAMI. */
 /* #undef HAVE_PAMI */
@@ -53,8 +76,44 @@
 /* Define to 1 if you have the <pmi.h> header file. */
 /* #undef HAVE_PMI_H */
 
+/* Define if you have the Portals. */
+/* #undef HAVE_PORTALS */
+
+/* Define to 1 if you have <portals3.h>. */
+/* #undef HAVE_PORTALS3_H */
+
+/* Define to 1 if you have <portals/portals3.h>. */
+/* #undef HAVE_PORTALS_PORTALS3_H */
+
 /* Define if you have POSIX threads libraries and header files. */
 #define HAVE_PTHREAD 1
+
+/* Define to 1 if you have the `PtlACEntry' function. */
+/* #undef HAVE_PTLACENTRY */
+
+/* Define to 1 if you have the `PtlErrorStr' function. */
+/* #undef HAVE_PTLERRORSTR */
+
+/* Define to 1 if you have the `PtlEventKindStr' function. */
+/* #undef HAVE_PTLEVENTKINDSTR */
+
+/* Define to 1 if you have the `PtlGetJid' function. */
+/* #undef HAVE_PTLGETJID */
+
+/* Define to 1 if you have the `PtlNIFailStr' function. */
+/* #undef HAVE_PTLNIFAILSTR */
+
+/* Define to 1 if the system has the type `ptl_eq_handler_t'. */
+/* #undef HAVE_PTL_EQ_HANDLER_T */
+
+/* Define if you have PTL_NOACK_REQ. */
+/* #undef HAVE_PTL_NOACK_REQ */
+
+/* Define if you have PTL_NO_ACK_REQ. */
+/* #undef HAVE_PTL_NO_ACK_REQ */
+
+/* Define to 1 if the system has the type `ptl_time_t'. */
+/* #undef HAVE_PTL_TIME_T */
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -68,11 +127,17 @@
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#define HAVE_SYS_SOCKET_H 1
+
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
+
+/* Define if you have the TCP socket. */
+#define HAVE_TCP_SOCKET 1
 
 /* Define if you have the Gemini. */
 /* #undef HAVE_UGNI */
@@ -89,6 +154,9 @@
 /* Timeout for RDMA function in IB */
 #define INFINIBAND_TIMEOUT 300
 
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+/* #undef NO_MINUS_C_MINUS_O */
+
 /* Name of package */
 #define PACKAGE "dataspaces"
 
@@ -99,13 +167,13 @@
 #define PACKAGE_NAME "dataspaces"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "dataspaces 1.4.0"
+#define PACKAGE_STRING "dataspaces 1.6.5"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "dataspaces"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.4.0"
+#define PACKAGE_VERSION "1.6.5"
 
 /* Define to the necessary symbol if this constant uses a non-standard name on
    your system. */
@@ -115,4 +183,4 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "1.4.0"
+#define VERSION "1.6.5"
